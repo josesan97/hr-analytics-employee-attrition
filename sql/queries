@@ -1,0 +1,391 @@
+-- ============================================================
+-- BUSINESS QUERIES
+-- ============================================================
+
+-- Create the employees table using the cleaned dataset structure.
+CREATE TABLE employees (
+
+    Age INTEGER NOT NULL,
+    Attrition TEXT NOT NULL,
+    BusinessTravel TEXT NOT NULL,
+    DailyRate INTEGER NOT NULL,
+    Department TEXT NOT NULL,
+    DistanceFromHome INTEGER NOT NULL,
+    Education INTEGER NOT NULL,
+    EducationField TEXT NOT NULL,
+    EmployeeNumber INTEGER PRIMARY KEY,
+    EnvironmentSatisfaction INTEGER NOT NULL,
+    Gender TEXT NOT NULL,
+    HourlyRate INTEGER NOT NULL,
+    JobInvolvement INTEGER NOT NULL,
+    JobLevel INTEGER NOT NULL,
+    JobRole TEXT NOT NULL,
+    JobSatisfaction INTEGER NOT NULL,
+    MaritalStatus TEXT NOT NULL,
+    MonthlyIncome INTEGER NOT NULL,
+    MonthlyRate INTEGER NOT NULL,
+    NumCompaniesWorked INTEGER NOT NULL,
+    OverTime TEXT NOT NULL,
+    PercentSalaryHike INTEGER NOT NULL,
+    PerformanceRating INTEGER NOT NULL,
+    RelationshipSatisfaction INTEGER NOT NULL,
+    StockOptionLevel INTEGER NOT NULL,
+    TotalWorkingYears INTEGER NOT NULL,
+    TrainingTimesLastYear INTEGER NOT NULL,
+    WorkLifeBalance INTEGER NOT NULL,
+    YearsAtCompany INTEGER NOT NULL,
+    YearsInCurrentRole INTEGER NOT NULL,
+    YearsSinceLastPromotion INTEGER NOT NULL,
+    YearsWithCurrManager INTEGER NOT NULL
+
+);
+
+-- Import the cleaned employee dataset into the employees table.
+.import --csv --skip 1 hr_employee_attrition_clean.csv employees
+
+
+-- Count the total number of employees in the dataset.
+SELECT count(*) AS "total_employees" FROM "employees";
+
+
+-- Calculate the overall employee distribution and attrition rate.
+SELECT
+    "Attrition",
+    count(*) AS "Employees",
+    ROUND(count(*) * 100.0 / (SELECT count(*) FROM "employees"), 2) AS "AttritionRate"
+FROM "employees"
+GROUP BY "Attrition";
+
+
+-- Analyze employee attrition by department.
+SELECT "Department", count(*) AS "TotalEmployees",
+SUM(CASE
+        WHEN "Attrition" = 'Yes' THEN 1
+        ELSE 0
+    END) AS "EmployeesLeft",
+ROUND(SUM(CASE
+                WHEN "Attrition" = 'Yes' THEN 1
+                ELSE 0 END) * 100.0 / count(*), 2) AS "AttritionRate"
+FROM "employees"
+GROUP BY "Department"
+ORDER BY "Attrition_Rate" DESC;
+
+
+-- Analyze employee attrition by job role.
+SELECT "JobRole", count(*) AS "TotalEmployees",
+SUM(CASE
+        WHEN "Attrition" = 'Yes' THEN 1
+        ELSE 0 END) AS "EmployeesLeft",
+ROUND(SUM(CASE
+        WHEN "Attrition" = 'Yes' THEN 1
+        ELSE 0 END) * 100.0 / count(*), 2) AS "AttritionRate"
+FROM "Employees"
+GROUP BY "JobRole"
+ORDER BY "AttritionRate" DESC;
+
+
+-- Compare attrition rates between employees who work overtime and those who do not.
+SELECT "OverTime", count(*) AS "TotalEmployees",
+SUM(CASE
+        WHEN "Attrition" = 'Yes' THEN 1
+        ELSE 0 END) AS "EmployeesLeft",
+ROUND(SUM(CASE
+                WHEN "Attrition" = 'Yes' THEN 1
+                ELSE 0 END) * 100.0 / count(*), 2) AS "AttritionRate"
+FROM "employees"
+GROUP BY "OverTime"
+ORDER BY "AttritionRate" DESC;
+
+
+-- Analyze attrition across monthly income levels.
+SELECT
+CASE
+    WHEN "MonthlyIncome" <= '5000' THEN 'Low'
+    WHEN "MonthlyIncome" <= '10000' THEN 'Medium'
+    WHEN "MonthlyIncome" <= '15000' THEN 'High'
+    ELSE 'Very High'
+END AS "IncomeLevel",
+count(*) AS "TotalEmployess",
+SUM(CASE
+        WHEN "Attrition" = 'Yes' THEN 1
+        ELSE 0 END) AS "EmployessLeft",
+ROUND(SUM(CASE
+                WHEN "Attrition" = 'Yes' THEN 1
+                ELSE 0 END) * 100.0 / count(*), 2) AS "AttritionRate"
+FROM "employees"
+GROUP BY "IncomeLevel"
+ORDER BY "AttritionRate" DESC;
+
+
+-- Analyze attrition by job satisfaction level.
+SELECT
+CASE
+    WHEN "JobSatisfaction" = 1 THEN 'Low'
+    WHEN "JobSatisfaction" = 2 THEN 'Medium'
+    WHEN "JobSatisfaction" = 3 THEN 'High'
+    ELSE 'Very High'
+END AS "SatisfactionLevel",
+count(*) AS "TotalEmployees",
+SUM(CASE
+        WHEN "Attrition" = 'Yes' THEN 1
+        ELSE 0 END) AS "EmployeesLeft",
+ROUND(SUM(CASE
+                WHEN "Attrition" = 'Yes' THEN 1
+                ELSE 0 END) * 100.0 / count(*), 2) AS "AttritionRate"
+FROM "employees"
+GROUP BY "JobSatisfaction"
+ORDER BY "JobSatisfaction";
+
+
+-- Analyze attrition by work-life balance level.
+SELECT
+CASE
+    WHEN "WorkLifeBalance" = 1 THEN 'Bad'
+    WHEN "WorkLifeBalance" = 2 THEN 'Medium'
+    WHEN "WorkLifeBalance" = 3 THEN 'Good'
+    ELSE 'Very Good'
+END AS "WorkLifeLevel",
+count(*) AS "TotalEmployees",
+SUM(CASE
+        WHEN "Attrition" = 'Yes' THEN 1
+        ELSE 0 END) AS "EmployeesLeft",
+ROUND(SUM(CASE
+                WHEN "Attrition" = 'Yes' THEN 1
+                ELSE 0 END) * 100.0 / count(*), 2) AS "AttritionRate"
+FROM "employees"
+GROUP BY "WorkLifeLevel"
+ORDER BY "WorkLifeLevel" ASC;
+
+
+-- Analyze attrition by years at the company using tenure ranges.
+SELECT
+CASE
+    WHEN "YearsAtCompany" <= 5 THEN '0 - 5'
+    WHEN "YearsAtCompany" <= 10 THEN '6 - 10'
+    WHEN "YearsAtCompany" <= 20 THEN '11 - 20'
+    ELSE '21+'
+END AS "YearsRange",
+count(*) AS "TotalEmployees",
+SUM(CASE
+        WHEN "Attrition" = 'Yes' THEN 1
+        ELSE 0 END) AS "EmployeesLeft",
+ROUND(SUM(CASE
+                WHEN "Attrition" = 'Yes' THEN 1
+                ELSE 0 END) * 100.0 / count(*), 2) AS "AttritionRate"
+FROM "employees"
+GROUP BY "YearsRange"
+ORDER BY "YearsAtCompany" ASC;
+
+
+-- Analyze attrition by commuting distance using distance ranges.
+SELECT
+CASE
+    WHEN "DistanceFromHome" <= 5 THEN 'Very Close'
+    WHEN "DistanceFromHome" <= 10 THEN 'Nearby'
+    WHEN "DistanceFromHome" <= 20 THEN 'Far'
+    ELSE 'Very Far'
+END AS "DistanceRange",
+count(*) AS "TotalEmployees",
+SUM(CASE
+        WHEN "Attrition" =  'Yes' THEN 1
+        ELSE 0 END) AS "EmployeesLeft",
+ROUND(SUM(CASE
+                WHEN "Attrition" = 'Yes' THEN 1
+                ELSE 0 END) * 100.0 / count(*), 2) AS "AttritionRate"
+FROM "employees"
+GROUP BY "DistanceRange"
+ORDER BY "DistanceFromHome";
+
+
+-- ============================================================
+-- ADVANCED SQL ANALYSIS
+-- ============================================================
+
+-- Analyze attrition by the combination of department and job role.
+SELECT "Department", "JobRole",
+        count(*) AS "TotalEmployees",
+        SUM(CASE
+                WHEN "Attrition" = 'Yes' THEN 1
+                ELSE 0 END) AS "EmployeesLeft",
+        ROUND(SUM(CASE
+                        WHEN "Attrition" = 'Yes' THEN 1
+                        ELSE 0 END) * 100.0 / count(*), 2) AS "AttritionRate"
+FROM "employees"
+GROUP BY "Department", "JobRole"
+HAVING "TotalEmployees" >= 20
+ORDER BY "AttritionRate" DESC;
+
+
+-- Segment employees into risk levels based on overtime, job satisfaction, tenure, and commuting distance.
+WITH "employees_risk" AS (
+        SELECT
+        "EmployeeNumber",
+        "OverTime",
+        "JobSatisfaction",
+        "YearsAtCompany",
+        "DistanceFromHome",
+        CASE
+            WHEN "OverTime" = 'Yes'
+                AND "JobSatisfaction" <= 2
+                AND "YearsAtCompany" <= 5
+                AND "DistanceFromHome" >= 11
+                THEN "High Risk"
+
+            WHEN "OverTime" = 'Yes'
+                AND (
+                        "JobSatisfaction" <= 2
+                        OR "YearsAtCompany" <= 5
+                        OR "DistanceFromHome" >= 11
+                        )
+                THEN "Medium Risk"
+
+                ELSE "Low Risk"
+           END AS "RiskLevel"
+        FROM "employees"
+)
+
+SELECT "RiskLevel",
+        count(*) AS "TotalEmployees",
+        SUM(CASE
+                WHEN "Attrition" = 'Yes' THEN 1 ELSE 0
+                END) AS "EmployeesLeft",
+        ROUND(SUM(CASE
+                       WHEN "Attrition" = 'Yes' THEN 1
+                       ELSE 0 END) * 100.0 / count(*), 2) AS "AttritionRate"
+FROM "employees_risk" AS "s"
+JOIN "employees" AS "e"
+ON "s"."EmployeeNumber" = "e"."EmployeeNumber"
+GROUP BY "RiskLevel"
+ORDER BY "AttritionRate" DESC;
+
+
+-- Compare attrition rates by job role and calculate each role's difference from the overall attrition rate.
+SELECT "JobRole",
+        count(*) AS "TotalEmployees",
+        SUM(CASE
+                 WHEN "Attrition" = 'Yes' THEN 1
+                      ELSE 0 END) AS "EmployeesLeft",
+        ROUND(SUM(
+                  CASE
+                       WHEN "Attrition" = 'Yes' THEN 1
+                            ELSE 0 END) * 100.0 / count(*), 2) AS "AttritionRate",
+        ROUND(SUM(
+                   CASE
+                        WHEN "Attrition" = 'Yes' THEN 1
+                             ELSE 0 END) * 100.0 / count(*) -
+                             (SELECT SUM(
+                                         CASE
+                                              WHEN "Attrition" = 'Yes' THEN 1
+                                              ELSE 0 END) * 100.0 / count(*)
+                              FROM "employees"), 2) AS "DifferenceFromAverage"
+FROM "employees"
+GROUP BY "JobRole"
+HAVING COUNT(*) >= 20
+ORDER BY "DifferenceFromAverage" DESC;
+
+
+-- Rank job roles based on their attrition rate.
+WITH "jobrole_attrition" AS(
+        SELECT "JobRole",
+        count(*) AS "TotalEmployees",
+        SUM(
+            CASE
+                WHEN "Attrition" = 'Yes' THEN 1
+                ELSE 0
+            END
+        ) AS "EmployeesLeft",
+        ROUND(
+                SUM(
+                        CASE
+                            WHEN "Attrition" = 'Yes' THEN 1
+                            ELSE 0
+                        END
+                ) * 100.0 / count(*), 2
+        ) AS "AttritionRate"
+FROM "employees"
+GROUP BY "JobRole"
+)
+
+SELECT
+    "JobRole",
+    "TotalEmployees",
+    "EmployeesLeft",
+    "AttritionRate",
+    RANK() OVER(
+            ORDER BY "AttritionRate"
+) AS "AttritionRank"
+FROM "jobrole_attrition"
+WHERE "TotalEmployees" >= 20
+ORDER BY "AttrtionRank";
+
+
+-- Analyze attrition by job role and monthly income level.
+WITH "income_attrition" AS(
+        SELECT
+              "JobRole",
+              "MonthlyIncome",
+              "Attrition",
+              CASE
+                  WHEN "MonthlyIncome" <= 5000 THEN "Low"
+                  WHEN "MonthlyIncome" <= 10000 THEN "Medium"
+                  WHEN "MonthlyIncome" <= 15000 THEN "High"
+                  ELSE "Very High"
+              END AS "IncomeLevel"
+
+        FROM "employees"
+)
+
+SELECT
+    "JobRole",
+    "IncomeLevel",
+    count(*) AS "TotalEmployees",
+    SUM(
+        CASE
+            WHEN "Attrition" = 'Yes' THEN 1
+            ELSE 0
+        END
+    ) AS "EmployeesLeft",
+    ROUND(
+        SUM(
+                CASE
+                    WHEN "Attrition" = 'Yes' THEN 1
+                    ELSE 0
+                END
+        ) * 100.0 / count(*), 2
+    ) AS "AttritionRate"
+FROM "income_attrition"
+GROUP BY "JobRole", "IncomeLevel"
+HAVING count(*) >= 10
+ORDER BY "AttritionRate" DESC;
+
+
+-- Compare attrition, average monthly income, and average tenure across departments.
+SELECT "Department",
+        count(*) AS "TotalEmployees",
+        SUM(
+                CASE
+                    WHEN "Attrition" = 'Yes' THEN 1
+                    ELSE 0
+                END
+        ) AS "EmployeesLeft",
+        ROUND(
+                SUM(
+                    CASE
+                        WHEN "Attrition" = 'Yes' THEN 1
+                        ELSE 0
+                    END
+                ) * 100.0 / count(*), 2
+        ) AS "AttritionRate",
+        ROUND(
+                AVG(
+                        "MonthlyIncome"
+                ), 2
+        ) AS "AverageIncome",
+        ROUND(
+                AVG(
+                        "YearsAtCompany"
+                ), 2
+        ) AS "AverageYears"
+FROM "employees"
+GROUP BY "Department"
+ORDER BY "AttritionRate" DESC;
